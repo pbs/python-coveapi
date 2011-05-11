@@ -19,19 +19,19 @@ Install <code>coveapi</code> to your Python path (hopefully in a virtual environ
     
 # Usage
 
-* To do anything, you will first need a connection to the COVE API service:
+To do anything, you will first need a connection to the COVE API service:
 
     import coveapi
     cove = coveapi.connect('PHONY-COVEAPI_APP_ID', 'PHONY-COVEAPI_APP_SECRET')
 
-* To retrieve a single resource, pass the resource ID, or resource URI to *.get():
+To retrieve a single resource, pass the resource ID, or resource URI to *.get():
 
     cove.videos.get(123)
     cove.videos.get('/cove/v1/videos/123/')
     cove.videos.get('http://api.pbs.org/cove/v1/videos/123/')
     
 
-* To retrieve a list resources, pass the filters to *.filter():
+To retrieve a list resources, pass the filters to *.filter():
 
     cove.programs.filter(filter_nola_root='NOVA')
     cove.programs.filter(filter_title='American Experience')
