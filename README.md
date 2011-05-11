@@ -38,10 +38,10 @@ To retrieve a list resources, pass the filters to <code>*.filter()</code>
 
 You may query with <code>*.get()</code> or <code>*.filter()</code> for:
 
-* Groups: <code>cove.groups.get(<resource>)</code>
-* Categories: <code>cove.categories.get(<resource>)</code>
-* Programs: <code>cove.programs.get(<resource>)</code>
-* Videos: <code>cove.videos.get(<resource>)</code>
+* Groups: <code>cove.groups.get(resource_uri)</code>
+* Categories: <code>cove.categories.get(resource_uri)</code>
+* Programs: <code>cove.programs.get(resource_uri)</code>
+* Videos: <code>cove.videos.get(resource_uri)</code>
     
 
 See COVE API documentation for the complete list of filters and return data.
