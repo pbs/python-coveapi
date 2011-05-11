@@ -12,7 +12,7 @@
 
 # Installation
 
-Install <code>coveapi</code> to your Python path (hopefull in a virtual environment).
+Install <code>coveapi</code> to your Python path (hopefully in a virtual environment!).
 
     python setup.py install
     
