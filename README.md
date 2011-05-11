@@ -1,6 +1,6 @@
 # Overview
 
-<code>coveapi</code> is the Python client for the PBS COVE API service.
+Python-coveapi is the Python client for the PBS COVE API service.
 
 
 # Getting Started
@@ -22,19 +22,26 @@ Install <code>coveapi</code> to your Python path (hopefully in a virtual environ
 To do anything, you will first need a connection to the COVE API service:
 
     import coveapi
-    cove = coveapi.connect('PHONY-COVEAPI_APP_ID', 'PHONY-COVEAPI_APP_SECRET')
+    cove = coveapi.connect('PHONY-COVEAPI-APP-ID', 'PHONY-COVEAPI-APP-SECRET')
 
-To retrieve a single resource, pass the resource ID, or resource URI to *.get():
+To retrieve a single resource, pass the resource ID, or resource URI to <code>*.get()</code>
 
-    cove.videos.get(123)
-    cove.videos.get('/cove/v1/videos/123/')
-    cove.videos.get('http://api.pbs.org/cove/v1/videos/123/')
+    cove.videos.get(3143)
+    cove.videos.get('/cove/v1/videos/3143/')
+    cove.videos.get('http://api.pbs.org/cove/v1/videos/3143/')
     
 
-To retrieve a list resources, pass the filters to *.filter():
+To retrieve a list resources, pass the filters to <code>*.filter()</code>
 
     cove.programs.filter(filter_nola_root='NOVA')
     cove.programs.filter(filter_title='American Experience')
 
+You may query with <code>*.get()</code> or <code>*.filter()</code> for:
+
+    * Groups: <code>cove.groups.get(<resource>)</code>
+    * Categories: <code>cove.categories.get(<resource>)</code>
+    * Programs: <code>cove.programs.get(<resource>)</code>
+    * Videos: <code>cove.videos.get(<resource>)</code>
+    
 
 See COVE API documentation for the complete list of filters and return data.
