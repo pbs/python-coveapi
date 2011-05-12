@@ -43,5 +43,6 @@ You may query with <code>*.get()</code> or <code>*.filter()</code> for:
 * Programs: <code>cove.programs.get(resource_uri)</code>
 * Videos: <code>cove.videos.get(resource_uri)</code>
     
+Everything returns Python dicts as outputted from JSON data.  
 
 See COVE API documentation for the complete list of filters and return data.
