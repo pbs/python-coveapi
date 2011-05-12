@@ -12,7 +12,7 @@ Python-coveapi is the Python client for the PBS COVE API service.
 
 # Installation
 
-Install <code>coveapi</code> to your Python path (hopefully in a virtual environment!).
+Install <code>coveapi</code> to your Python path (hopefully in a [virtualenv](http://www.virtualenv.org/)!).
 
     python setup.py install
     
@@ -43,6 +43,6 @@ You may query with <code>*.get()</code> or <code>*.filter()</code> for:
 * Programs: <code>cove.programs.get(resource_uri)</code>
 * Videos: <code>cove.videos.get(resource_uri)</code>
     
-Everything returns Python dicts as outputted from JSON data.  
+Everything returns a Python <code>dict</code> as emitted from JSON data.  
 
 See COVE API documentation for the complete list of filters and return data.
