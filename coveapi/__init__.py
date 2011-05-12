@@ -3,7 +3,7 @@ A Python client for the PBS COVE API service.
 """
 
 # client version
-__version__ = '0.1b'
+__version__ = '0.2dev'
 
 # coveapi constants
 COVEAPI_VERSION = 'v1'

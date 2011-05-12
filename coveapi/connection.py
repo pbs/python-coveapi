@@ -1,20 +1,16 @@
 """Module: `coveapi.connection`
-Connection object for accessing COVE API.
+Connection classes for accessing COVE API.
 """
-import hmac
-import hashlib
-import time
 import urllib
 import urllib2
-from base64 import urlsafe_b64encode
-from os import urandom
 
 import simplejson as json
 
 from coveapi import COVEAPI_HOST, COVEAPI_ENDPOINT_CATEGORIES, \
     COVEAPI_ENDPOINT_GROUPS, COVEAPI_ENDPOINT_PROGRAMS, \
     COVEAPI_ENDPOINT_VIDEOS
-   
+from coveapi.auth import PBSAuthorization
+
 
 class COVEAPIConnection(object):
     """Connect to the COVE API service.
@@ -25,7 +21,7 @@ class COVEAPIConnection(object):
     `api_host` -- host of COVE API (default: COVEAPI_HOST)
     
     Returns:
-    `coveapi.connection.COVEAPIConnection` object
+    `coveapi.connection.COVEAPIConnection` instance
     """
     def __init__(self, api_app_id, api_app_secret, api_host=COVEAPI_HOST):
         self.api_app_id = api_app_id
@@ -41,7 +37,7 @@ class COVEAPIConnection(object):
         `**params` -- filters, fields, sorts (see api documentation)
         
         Returns:
-        `coveapi.connection.Requestor` object
+        `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_PROGRAMS)
         return Requestor(self.api_app_id, self.api_app_secret, endpoint,
@@ -56,7 +52,7 @@ class COVEAPIConnection(object):
         `**params` -- filters, fields, sorts (see api documentation)
         
         Returns:
-        `coveapi.connection.Requestor` object
+        `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_CATEGORIES)
         return Requestor(self.api_app_id, self.api_app_secret, endpoint,
@@ -71,7 +67,7 @@ class COVEAPIConnection(object):
         `**params` -- filters, fields, sorts (see api documentation)
         
         Returns:
-       `coveapi.connection.Requestor` object
+       `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_GROUPS)
         return Requestor(self.api_app_id, self.api_app_secret, endpoint,
@@ -86,7 +82,7 @@ class COVEAPIConnection(object):
         `**params` -- filters, fields, sorts (see api documentation)
         
         Returns:
-        `coveapi.connection.Requestor` object
+        `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_VIDEOS)
         return Requestor(self.api_app_id, self.api_app_secret, endpoint,
@@ -102,7 +98,7 @@ class Requestor(object):
     `endpoint` -- endpoint of COVE API request
     
     Returns:
-    `coveapi.connection.Requestor` object
+    `coveapi.connection.Requestor` instance
     """
     def __init__(self, api_app_id, api_app_secret, endpoint,
                  api_host=COVEAPI_HOST):
@@ -120,7 +116,7 @@ class Requestor(object):
         `**params` -- filters, fields, sorts (see api documentation)
         
         Returns:
-        `dict` json object
+        `dict` (json)
         """
         if type(resource) == int:
             endpoint = '%s%s/' % (self.endpoint, resource)
@@ -140,38 +136,42 @@ class Requestor(object):
         `**params` -- filters, fields, sorts (see api documentation)
         
         Returns:
-        `dict` json object
+        `dict` (json)
         """
         return self._make_request(self.endpoint, params)
-
+    
 
     def _make_request(self, endpoint, params=None):
-        """Send request to COVE API and return results as json object."""
+        """Send request to COVE API and return results as json object.
+        
+        Keyword arguments:
+        `endpoint` -- endpoint of COVE API request
+        `**params` -- filters, fields, sorts (see api documentation)
+        
+        Returns:
+        `dict` (json)
+        """
         if not params:
             params = {}
 
-        timestamp = str(time.time())
-        nonce = urlsafe_b64encode(urandom(32)).strip("=")
-        
         query = endpoint
         if params:
             params = params.items()
             params.sort()
-            query = '%s?%s' % (query, urllib.urlencode(params))
             
-        to_be_signed = 'GET%s%s%s%s' % (query, timestamp,
-                                        self.api_app_id, nonce)
-        signature = hmac.new(self.api_app_secret.encode('utf-8'),
-                             to_be_signed.encode('utf-8'),
-                             hashlib.sha1).hexdigest()
-        headers = {
-            'X-PBSAuth-Timestamp': timestamp,
-            'X-PBSAuth-Consumer-Key': self.api_app_id,
-            'X-PBSAuth-Signature': signature,
-            'X-PBSAuth-Nonce': nonce
-        }
-
-        request = urllib2.Request(query, None, headers)
-        response = urllib2.urlopen(request)
+            # Note: We're using urllib.urlencode() below which escapes spaces as
+            # a plus ("+") since that is what the COVE API expects. But a space
+            # should really be encoded as "%20" (ie. urllib.quote()). I believe
+            # this is a bug in the COVE API authentication scheme... but we have
+            # to live with this in the client. We'll update this to use "%20"
+            # once the COVE API supports it properly.
+            query = '%s?%s' % (query, urllib.urlencode(params))
+        
+        request = urllib2.Request(query)
+        
+        auth = PBSAuthorization(self.api_app_id, self.api_app_secret)
+        signed_request = auth.sign_request(request)
+        
+        response = urllib2.urlopen(signed_request)
         
         return json.loads(response.read())
