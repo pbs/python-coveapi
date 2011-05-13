@@ -1,2 +1,4 @@
 *.kpf
 *.pyc
+build
+MANIFEST
