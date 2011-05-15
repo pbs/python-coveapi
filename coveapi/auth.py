@@ -2,7 +2,10 @@
 Authorization classes for signing COVE API requests.
 """
 import hmac
-import hashlib
+try:
+    from hashlib import sha1
+except ImportError:
+    import sha as sha1
 import time
 from base64 import urlsafe_b64encode
 from os import urandom
@@ -40,7 +43,7 @@ class PBSAuthorization(object):
                                         self.api_app_id, nonce)
         signature = hmac.new(self.api_app_secret.encode('utf-8'),
                              to_be_signed.encode('utf-8'),
-                             hashlib.sha1).hexdigest()
+                             sha1).hexdigest()
         
         request.add_header('X-PBSAuth-Timestamp', timestamp)
         request.add_header('X-PBSAuth-Consumer-Key', self.api_app_id)
