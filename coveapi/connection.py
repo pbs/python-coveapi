@@ -87,6 +87,20 @@ class COVEAPIConnection(object):
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_VIDEOS)
         return Requestor(self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
+                         
+    @property
+    def graveyard(self, **params):
+        """Handle graveyard requests.
+
+        Keyword arguments:
+        `**params` -- deleted_since (see api documentation)
+
+        Returns:
+        `coveapi.connection.Requestor` instance
+        """
+        endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_GRAVEYARD)
+        return Requestor(self.api_app_id, self.api_app_secret, endpoint,
+                         self.api_host)
 
 
 class Requestor(object):
@@ -140,6 +154,16 @@ class Requestor(object):
         """
         return self._make_request(self.endpoint, params)
     
+    def deleted_since(self, **params):
+        """Fetch deleted cove assets per 'deleted_since' parm.
+
+        Keyword arguments:
+        `**params` -- datetime (see api documentation)
+
+        Returns:
+        `dict` (json)
+        """
+        return self._make_request(self.endpoint, params)
 
     def _make_request(self, endpoint, params=None):
         """Send request to COVE API and return results as json object.
