@@ -35,6 +35,10 @@ To retrieve a list resources, pass the filters to <code>*.filter()</code>
 
     cove.programs.filter(filter_nola_root='NOVA')
     cove.programs.filter(filter_title='American Experience')
+    
+To retrieve deleted resources, use the graveyard's deleted_since method:
+
+    cove.graveyard.deleted_since(deleted_since='2014-04-10T05:00:00')
 
 You may query with <code>*.get()</code> or <code>*.filter()</code> for:
 
