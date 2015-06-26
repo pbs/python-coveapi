@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name = 'python-coveapi',
-    version = '0.2dev',
+    version = '0.3dev',
     packages = ['coveapi', ],
     author = 'Drew Engelson',
     author_email = 'dsengelson@pbs.org',

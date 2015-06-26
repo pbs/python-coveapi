@@ -2,9 +2,7 @@
 Connection classes for accessing COVE API.
 """
 import urllib
-import urllib2
-
-import simplejson as json
+import requests
 
 from coveapi import COVEAPI_HOST, COVEAPI_ENDPOINT_CATEGORIES, \
     COVEAPI_ENDPOINT_GROUPS, COVEAPI_ENDPOINT_PROGRAMS, \
@@ -27,6 +25,7 @@ class COVEAPIConnection(object):
         self.api_app_id = api_app_id
         self.api_app_secret = api_app_secret
         self.api_host = api_host
+        self.session = requests.Session()
 
 
     @property
@@ -40,7 +39,7 @@ class COVEAPIConnection(object):
         `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_PROGRAMS)
-        return Requestor(self.api_app_id, self.api_app_secret, endpoint,
+        return Requestor(self.session, self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
 
     
@@ -55,7 +54,7 @@ class COVEAPIConnection(object):
         `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_CATEGORIES)
-        return Requestor(self.api_app_id, self.api_app_secret, endpoint,
+        return Requestor(self.session, self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
 
     
@@ -70,7 +69,7 @@ class COVEAPIConnection(object):
        `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_GROUPS)
-        return Requestor(self.api_app_id, self.api_app_secret, endpoint,
+        return Requestor(self.session, self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
 
         
@@ -85,7 +84,7 @@ class COVEAPIConnection(object):
         `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_VIDEOS)
-        return Requestor(self.api_app_id, self.api_app_secret, endpoint,
+        return Requestor(self.session, self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
                          
     @property
@@ -99,7 +98,7 @@ class COVEAPIConnection(object):
         `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_GRAVEYARD)
-        return Requestor(self.api_app_id, self.api_app_secret, endpoint,
+        return Requestor(self.session, self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
 
 
@@ -114,12 +113,13 @@ class Requestor(object):
     Returns:
     `coveapi.connection.Requestor` instance
     """
-    def __init__(self, api_app_id, api_app_secret, endpoint,
+    def __init__(self, session, api_app_id, api_app_secret, endpoint,
                  api_host=COVEAPI_HOST):
         self.api_app_id = api_app_id
         self.api_app_secret = api_app_secret
         self.endpoint = endpoint
         self.api_host = api_host
+        self.session = session
 
 
     def get(self, resource, **params):
@@ -190,12 +190,13 @@ class Requestor(object):
             # to live with this in the client. We'll update this to use "%20"
             # once the COVE API supports it properly.
             query = '%s?%s' % (query, urllib.urlencode(params))
-        
-        request = urllib2.Request(query)
-        
+
+        req = requests.Request('GET', query)
+        r = req.prepare()
+
         auth = PBSAuthorization(self.api_app_id, self.api_app_secret)
-        signed_request = auth.sign_request(request)
+        signed_request = auth.sign_request(r)
+
+        response = self.session.send(signed_request)
         
-        response = urllib2.urlopen(signed_request)
-        
-        return json.loads(response.read())
+        return response.json()
