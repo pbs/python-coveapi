@@ -10,7 +10,7 @@ from os import urandom
 
 class PBSAuthorization(object):
     """Authorization class for signing COVE API requests.
-    
+
     Keyword arguments:
     `api_app_id` -- your COVE API app id
     `api_app_secret` -- your COVE API secret key
@@ -21,14 +21,14 @@ class PBSAuthorization(object):
     def __init__(self, api_app_id, api_app_secret):
         self.api_app_id = api_app_id
         self.api_app_secret = api_app_secret
-    
-    
+
+
     def sign_request(self, request):
         """Sign request per PBSAuth specifications.
-            
+
         Keyword arguments:
         `request` -- instance of `urllib2.Request`
-            
+
         Returns:
         instance of `urllib2.Request` (signed)
         """
