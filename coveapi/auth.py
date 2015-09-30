@@ -33,7 +33,7 @@ class PBSAuthorization(object):
         instance of `urllib2.Request` (signed)
         """
         timestamp = str(time.time())
-        nonce = urlsafe_b64encode(urandom(32)).strip("=")
+        nonce = urlsafe_b64encode(urandom(32)).decode().strip("=")
 
         to_be_signed = 'GET%s%s%s%s' % (request.url, timestamp,
                                         self.api_app_id, nonce)
