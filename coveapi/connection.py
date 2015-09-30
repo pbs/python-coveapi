@@ -1,7 +1,11 @@
 """Module: `coveapi.connection`
 Connection classes for accessing COVE API.
 """
-import urllib
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
+
 import requests
 
 from coveapi import COVEAPI_HOST, COVEAPI_ENDPOINT_CATEGORIES, \
@@ -17,7 +21,7 @@ class COVEAPIConnection(object):
     `api_app_id` -- your COVE API app id
     `api_app_secret` -- your COVE API secret key
     `api_host` -- host of COVE API (default: COVEAPI_HOST)
-    
+
     Returns:
     `coveapi.connection.COVEAPIConnection` instance
     """
@@ -31,10 +35,10 @@ class COVEAPIConnection(object):
     @property
     def programs(self, **params):
         """Handle program requests.
-        
+
         Keyword arguments:
         `**params` -- filters, fields, sorts (see api documentation)
-        
+
         Returns:
         `coveapi.connection.Requestor` instance
         """
@@ -42,14 +46,14 @@ class COVEAPIConnection(object):
         return Requestor(self.session, self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
 
-    
+
     @property
     def categories(self, **params):
         """Handle category requests.
-        
+
         Keyword arguments:
         `**params` -- filters, fields, sorts (see api documentation)
-        
+
         Returns:
         `coveapi.connection.Requestor` instance
         """
@@ -57,14 +61,14 @@ class COVEAPIConnection(object):
         return Requestor(self.session, self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
 
-    
+
     @property
     def groups(self, **params):
         """Handle group requests.
-        
+
         Keyword arguments:
         `**params` -- filters, fields, sorts (see api documentation)
-        
+
         Returns:
        `coveapi.connection.Requestor` instance
         """
@@ -72,21 +76,21 @@ class COVEAPIConnection(object):
         return Requestor(self.session, self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
 
-        
+
     @property
     def videos(self, **params):
         """Handle video requests.
-        
+
         Keyword arguments:
         `**params` -- filters, fields, sorts (see api documentation)
-        
+
         Returns:
         `coveapi.connection.Requestor` instance
         """
         endpoint = '%s%s' % (self.api_host, COVEAPI_ENDPOINT_VIDEOS)
         return Requestor(self.session, self.api_app_id, self.api_app_secret, endpoint,
                          self.api_host)
-                         
+
     @property
     def graveyard(self, **params):
         """Handle graveyard requests.
@@ -104,12 +108,12 @@ class COVEAPIConnection(object):
 
 class Requestor(object):
     """Handle API requests.
-    
+
     Keyword arguments:
     `api_app_id` -- your COVE API app id
     `api_app_secret` -- your COVE API secret key
     `endpoint` -- endpoint of COVE API request
-    
+
     Returns:
     `coveapi.connection.Requestor` instance
     """
@@ -128,7 +132,7 @@ class Requestor(object):
         Keyword arguments:
         `resource` -- resource id or uri
         `**params` -- filters, fields, sorts (see api documentation)
-        
+
         Returns:
         `dict` (json)
         """
@@ -139,7 +143,7 @@ class Requestor(object):
                 endpoint = resource
             else:
                 endpoint = '%s%s' % (self.api_host, resource)
-        
+
         return self._make_request(endpoint, params)
 
 
@@ -148,12 +152,12 @@ class Requestor(object):
 
         Keyword arguments:
         `**params` -- filters, fields, sorts (see api documentation)
-        
+
         Returns:
         `dict` (json)
         """
         return self._make_request(self.endpoint, params)
-    
+
     def deleted_since(self, **params):
         """Fetch deleted cove assets per 'deleted_since' parm.
 
@@ -167,11 +171,11 @@ class Requestor(object):
 
     def _make_request(self, endpoint, params=None):
         """Send request to COVE API and return results as json object.
-        
+
         Keyword arguments:
         `endpoint` -- endpoint of COVE API request
         `**params` -- filters, fields, sorts (see api documentation)
-        
+
         Returns:
         `dict` (json)
         """
@@ -180,16 +184,16 @@ class Requestor(object):
 
         query = endpoint
         if params:
-            params = params.items()
+            params = list(params.items())
             params.sort()
-            
-            # Note: We're using urllib.urlencode() below which escapes spaces as
+
+            # Note: We're using urlencode() below which escapes spaces as
             # a plus ("+") since that is what the COVE API expects. But a space
             # should really be encoded as "%20" (ie. urllib.quote()). I believe
             # this is a bug in the COVE API authentication scheme... but we have
             # to live with this in the client. We'll update this to use "%20"
             # once the COVE API supports it properly.
-            query = '%s?%s' % (query, urllib.urlencode(params))
+            query = '%s?%s' % (query, urlencode(params))
 
         req = requests.Request('GET', query)
         r = req.prepare()
@@ -198,5 +202,5 @@ class Requestor(object):
         signed_request = auth.sign_request(r)
 
         response = self.session.send(signed_request)
-        
+
         return response.json()
